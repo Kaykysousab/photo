@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captura de Foto</title>
+  <link rel="stylesheet" href="../tailwind.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #7ef388 0%, #296df5 100%);
+    }
+
+    .bg-blur {
+      backdrop-filter: blur(10px);
+      background-color: rgba(255, 255, 255, 0.4); /* White background with 40% opacity */
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center h-screen">
+  <div class="bg-blur p-8 rounded-lg border-2 border-black shadow-lg w-full max-w-lg">
+    <h1 class="text-3xl font-bold mb-6 text-center text-white">Captura de Foto</h1>
+    
+    <div id="cameraContainer" class="relative">
+      <video id="video" class="w-full bg-gray-200 border-1 border-black rounded-lg" autoplay></video>
+      <div id="photoContainer" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-gray-100 rounded-lg">
+        <img id="photo" class="w-full bg-gray-200 rounded-lg mb-6" />
+        <div class="flex justify-center space-x-4">
+          <button id="save" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">Salvar Foto</button>
+          <button id="remove" class="px-6 py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition">Remover Foto</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="flex justify-center mt-6"> 
+    <button  id="capture" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:bg-purple-400 hover:to-blue-400 text-white font-bold py-4 px-6 rounded-full shadow-lg duration-500 ease-in-out hover:scale-110 hover:brightness-110 hover:animate-pulse active:animate-bounce">
+    Captura Foto
+    </button>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const capture = document.getElementById('capture');
+    const photo = document.getElementById('photo');
+    const photoContainer = document.getElementById('photoContainer');
+    const save = document.getElementById('save');
+    const remove = document.getElementById('remove');
+    const cameraContainer = document.getElementById('cameraContainer');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(error => {
+        console.error('Erro ao acessar a câmera: ', error);
+      });
+
+    capture.addEventListener('click', () => {
+      const { videoWidth: width, videoHeight: height } = video;
+      canvas.width = width;
+      canvas.height = height;
+      context.drawImage(video, 0, 0, width, height);
+      photo.src = canvas.toDataURL('image/png');
+      video.classList.add('hidden');
+      photoContainer.classList.remove('hidden');
+    });
+
+    save.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = photo.src;
+      link.download = 'foto.png';
+      link.click();
+    });
+
+    remove.addEventListener('click', () => {
+      photoContainer.classList.add('hidden');
+      video.classList.remove('hidden');
+      canvas.width = 0;
+      canvas.height = 0;
+      photo.src = '';
+    });
+  </script>
+</body>
+</html>
